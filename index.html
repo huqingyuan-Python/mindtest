@@ -182,7 +182,7 @@
             outline: none;
             transition: all 0.2s ease;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 8px center;
             background-size: 14px;
@@ -198,7 +198,7 @@
 
         .subtitle {
             text-align: center;
-            color: var(--text-secondary);
+            color: var(--='2' stroke-linecap='round' stroke-linejointext-secondary);
             margin-bottom: 30px;
             font-size: 1rem;
         }
@@ -1311,7 +1311,12 @@
         <div class="result-container" id="result">
             <h2 class="result-title" id="resultTitle">测试结果</h2>
 
-            <!-- 紧急求助提示 -->
+            <div class="result-score" id="score"></div>
+            <canvas id="resultChart" width="400" height="200" style="max-width: 100%; margin: 20px auto; display: none;"></canvas>
+            <div class="result-description" id="description"></div>
+            <div class="suggestions" id="suggestions"></div>
+
+            <!-- 紧急求助提示移动到这里 -->
             <div id="emergencyBanner" class="emergency-banner" style="display: none;">
                 <div class="emergency-content">
                     <h3>⚠️ 需要立即帮助？</h3>
@@ -1324,11 +1329,6 @@
                     <p class="emergency-note">您并不孤单，专业帮助随时可用。</p>
                 </div>
             </div>
-
-            <div class="result-score" id="score"></div>
-            <canvas id="resultChart" width="400" height="200" style="max-width: 100%; margin: 20px auto; display: none;"></canvas>
-            <div class="result-description" id="description"></div>
-            <div class="suggestions" id="suggestions"></div>
 
             <div class="result-actions">
                 <button id="shareButton" onclick="shareResult()">分享结果 (Ctrl+C)</button>
@@ -2341,7 +2341,6 @@
 
         // 快速保存
         function quickSave(isAuto = false) {
-            const texts = translations[currentLang];
             if (answers.length === 0) return;
 
             const saveData = {
@@ -2358,11 +2357,8 @@
             if (!isAuto) {
                 const status = document.getElementById('saveStatus');
                 status.style.display = 'inline';
-                status.textContent = '✓ ' + (texts.autoSaveComplete || '已保存');
+                status.textContent = '✓ 已保存';
                 setTimeout(() => status.style.display = 'none', 2000);
-                showToast(texts.autoSaveComplete || '保存成功', 'success');
-            } else {
-                showToast(texts.autoSave || '自动保存中...', 'info', 1500);
             }
         }
 
@@ -2434,9 +2430,7 @@
 
         // 保存并退出
         function saveAndExit() {
-            const texts = translations[currentLang];
-            if (confirm(texts.saveExitButton + '?')) {
-                showToast('测试进度已保存！', 'info');
+            if (confirm('保存并退出?')) {
                 if (timerInterval) clearInterval(timerInterval);
                 if (autoSaveInterval) clearInterval(autoSaveInterval);
                 localStorage.removeItem('pausedTest');
@@ -2931,9 +2925,7 @@
             shareText += `\n\n#心理健康自测`;
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(shareText).then(() => {
-                    showToast(texts.shareSuccess);
-                }).catch(() => {
+                navigator.clipboard.writeText(shareText).catch(() => {
                     fallbackCopy(shareText, texts.shareFailed);
                 });
             } else {
@@ -2949,7 +2941,6 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                showToast(translations[currentLang].shareSuccess);
             } catch (err) {
                 showToast(failMessage, 'error');
                 alert(text);
@@ -2959,12 +2950,10 @@
 
         // 打印结果
         function printResults() {
-            const texts = translations[currentLang];
             try {
                 window.print();
-                showToast(texts.printSuccess, 'info');
             } catch (err) {
-                showToast(texts.printFailed, 'error');
+                showToast('打印功能不可用', 'error');
             }
         }
 
@@ -3024,12 +3013,11 @@
 
         // 清除历史记录
         function clearHistory() {
-            const texts = translations[currentLang];
-            if (confirm(texts.clearHistoryConfirm)) {
+            if (confirm('确定要清除所有历史记录吗？此操作不可恢复。')) {
                 testHistory = [];
                 feedbackHistory = [];
                 saveSettings();
-                showToast(texts.clearHistorySuccess);
+                showToast('历史记录已清除');
                 updateQuickStats();
                 closeHistory();
 
@@ -3040,9 +3028,8 @@
 
         // 导出数据
         function exportData() {
-            const texts = translations[currentLang];
             if (testHistory.length === 0) {
-                showToast(texts.emptyExport, 'info');
+                showToast('没有数据可导出', 'info');
                 return;
             }
 
@@ -3069,9 +3056,9 @@
                 link.click();
                 URL.revokeObjectURL(url);
 
-                showToast(texts.exportSuccess);
+                showToast('数据导出成功！');
             } catch (err) {
-                showToast(texts.exportFailed, 'error');
+                showToast('导出失败', 'error');
             }
         }
 
@@ -3089,7 +3076,6 @@
 
         // 导入数据
         function importData() {
-            const texts = translations[currentLang];
             const fileInput = document.getElementById('importFile');
             const file = fileInput.files[0];
 
@@ -3132,7 +3118,7 @@
                     updateQuickStats();
                     closeImportDialog();
 
-                    showToast(`${texts.importSuccess} (${importedCount} 条)`);
+                    showToast(`数据导入成功！ (${importedCount} 条)`);
 
                     // 更新界面
                     if (document.getElementById('result').classList.contains('active')) {
@@ -3140,7 +3126,7 @@
                     }
 
                 } catch (err) {
-                    showToast(texts.importFailed, 'error');
+                    showToast('导入失败，文件格式不正确', 'error');
                 }
             };
 
@@ -3149,7 +3135,6 @@
 
         // 显示趋势图表
         function showTrendChart() {
-            const texts = translations[currentLang];
             if (testHistory.length < 2) {
                 showToast('需要至少2次测试数据', 'info');
                 return;
@@ -3162,12 +3147,11 @@
             document.getElementById('statsSection').style.display = 'block';
             drawTrendChart();
 
-            showToast(texts.statsTitle, 'info');
+            showToast('历史趋势分析', 'info');
         }
 
         // 提交反馈
         function submitFeedback(rating) {
-            const texts = translations[currentLang];
             const feedback = {
                 timestamp: new Date().toLocaleString(currentLang),
                 rating: rating,
@@ -3180,7 +3164,7 @@
             }
 
             saveSettings();
-            showToast(texts.feedbackThanks);
+            showToast('感谢您的反馈！');
 
             // 视觉反馈
             const buttons = document.querySelectorAll('.feedback-btn');
@@ -3394,7 +3378,6 @@
 
         // 全屏模式
         function toggleFullscreen() {
-            const texts = translations[currentLang];
             const container = document.getElementById('mainContainer');
 
             if (!isFullscreen) {
@@ -3409,7 +3392,6 @@
                 }
                 container.classList.add('fullscreen');
                 isFullscreen = true;
-                showToast(texts.fullscreenEnter || '进入全屏模式', 'info');
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
@@ -3422,7 +3404,6 @@
                 }
                 container.classList.remove('fullscreen');
                 isFullscreen = false;
-                showToast(texts.fullscreenExit || '退出全屏模式', 'info');
             }
         }
 
