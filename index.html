@@ -1,0 +1,3450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#818cf8">
+    <meta name="description" content="专业的心理健康自测工具">
+    <title>心理健康自测</title>
+    <style>
+        :root {
+            --bg-gradient-start: #e0e7ff;
+            --bg-gradient-end: #d1d5db;
+            --container-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #4a5568;
+            --text-secondary: #718096;
+            --text-dark: #2d3748;
+            --border-color: rgba(224, 231, 255, 0.5);
+            --primary-gradient: linear-gradient(90deg, #a5b4fc 0%, #818cf8 100%);
+            --primary-hover: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --warning-bg: #fef3c7;
+            --warning-border: #f59e0b;
+            --danger-bg: #fee2e2;
+            --danger-border: #ef4444;
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --modal-bg: rgba(0, 0, 0, 0.5);
+            --option-hover: rgba(224, 231, 255, 0.4);
+            --option-selected: var(--primary-gradient);
+            --button-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --context-menu-bg: rgba(255, 255, 255, 0.95);
+            --context-menu-border: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e293b;
+            --container-bg: rgba(30, 41, 59, 0.95);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-dark: #f1f5f9;
+            --border-color: rgba(148, 163, 184, 0.3);
+            --primary-gradient: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
+            --primary-hover: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            --success-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+            --warning-bg: #451a03;
+            --warning-border: #f59e0b;
+            --danger-bg: #450a0a;
+            --danger-border: #ef4444;
+            --danger-gradient: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            --option-hover: rgba(99, 102, 241, 0.2);
+            --context-menu-bg: rgba(30, 41, 59, 0.98);
+            --context-menu-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            animation: fadeIn 0.5s ease-in-out;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container.fullscreen {
+            max-width: 100%;
+            width: 100%;
+            height: 100vh;
+            border-radius: 0;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            flex: 1;
+            min-width: 200px;
+            font-weight: 700;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--button-shadow);
+            position: relative;
+            user-select: none;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .language-selector select {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            padding-right: 28px;
+            box-shadow: var(--button-shadow);
+        }
+
+        .language-selector select:hover {
+            background-color: var(--option-hover);
+            border-color: #a5b4fc;
+            transform: translateY(-1px);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .intro-container {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .intro-content {
+            text-align: center;
+        }
+
+        .intro-content h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .intro-text {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            line-height: 1.6;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .intro-text p {
+            margin-bottom: 10px;
+        }
+
+        .intro-text ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .intro-text li {
+            margin-bottom: 8px;
+        }
+
+        .intro-text strong {
+            color: var(--text-primary);
+        }
+
+        .intro-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .system-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        #progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+
+        .progress-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            background: var(--border-color);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            background: var(--primary-gradient);
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+            width: 0%;
+            position: relative;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .question-container {
+            display: none;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            color: var(--text-primary);
+            box-shadow: var(--button-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            background: var(--option-hover);
+            transform: translateX(5px);
+            border-color: #a5b4fc;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .option.selected {
+            background: var(--option-selected);
+            color: white;
+            border-color: transparent;
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .option.selected::after {
+            content: '✓';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            box-shadow: var(--button-shadow);
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .pause-container {
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .pause-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .pause-container p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .pause-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .result-container.active {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .emergency-banner {
+            background: var(--danger-bg);
+            border: 2px solid var(--danger-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        .emergency-content h3 {
+            color: #991b1b;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .emergency-content p {
+            color: #7f1d1d;
+            margin-bottom: 15px;
+        }
+
+        .hotline-numbers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .hotline-btn {
+            background: var(--danger-gradient);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .hotline-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .emergency-note {
+            font-weight: bold;
+            color: #991b1b;
+            margin-top: 10px;
+        }
+
+        .healthy-score {
+            background: var(--success-gradient);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            animation: pulse 3s infinite;
+        }
+
+        .healthy-score h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .healthy-score p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .result-description {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            line-height: 1.6;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .suggestions {
+            background: var(--warning-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid var(--warning-border);
+        }
+
+        .suggestions h3 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .suggestions li {
+            padding: 5px 0;
+            color: var(--text-dark);
+        }
+
+        .suggestions li:before {
+            content: "• ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .result-actions button {
+            min-width: 120px;
+        }
+
+        .stats-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .feedback-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .feedback-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .feedback-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
+        .feedback-btn:hover {
+            background: var(--option-hover);
+            transform: translateY(-2px);
+            animation: shake 0.5s;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--container-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #historyList {
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .history-item h4 {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .history-item .date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .history-item .scores {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .history-item .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .badge-healthy {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-mild {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-moderate {
+            background: #f97316;
+            color: white;
+        }
+
+        .badge-severe {
+            background: #ef4444;
+            color: white;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px;
+        }
+
+        .help-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            z-index: 999;
+        }
+
+        .help-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-btn:active {
+            transform: scale(0.95);
+        }
+
+        .context-menu {
+            position: fixed;
+            background: var(--context-menu-bg);
+            border: 1px solid var(--context-menu-border);
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 5px 0;
+            min-width: 180px;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.2s ease;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .context-menu-item:hover {
+            background: var(--option-hover);
+            transform: translateX(3px);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--success-gradient);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--danger-gradient);
+        }
+
+        .toast.info {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .toast.warning {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .import-content {
+            text-align: left;
+        }
+
+        .import-content p {
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        #importFile {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .container.fullscreen {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .intro-content h2 {
+                font-size: 1.4rem;
+            }
+
+            .question {
+                font-size: 1rem;
+            }
+
+            .option {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+                min-width: 80px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-controls {
+                justify-content: center;
+            }
+
+            .healthy-score h3 {
+                font-size: 1.5rem;
+            }
+
+            .healthy-score p {
+                font-size: 1rem;
+            }
+
+            .intro-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .intro-buttons button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+
+            .result-actions button {
+                width: 100%;
+            }
+
+            .hotline-numbers {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+                margin: 10px;
+            }
+
+            .help-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .feedback-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feedback-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .pause-actions {
+                flex-direction: column;
+            }
+
+            .pause-actions button {
+                width: 100%;
+            }
+
+            .progress-controls {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .history-actions {
+                flex-direction: column;
+            }
+
+            .history-actions button {
+                width: 100%;
+            }
+
+            .import-actions {
+                flex-direction: column;
+            }
+
+            .import-actions button {
+                width: 100%;
+            }
+
+            .context-menu {
+                min-width: 140px;
+                font-size: 0.85rem;
+            }
+
+            .context-menu-item {
+                padding: 8px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .progress-info {
+                font-size: 0.8rem;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .emergency-content h3 {
+                font-size: 1.1rem;
+            }
+
+            .hotline-btn {
+                font-size: 0.9rem;
+            }
+
+            .toast {
+                min-width: 150px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white !important;
+            }
+
+            .container {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                background: white !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            .header-controls,
+            .buttons,
+            .result-actions,
+            #progress-container,
+            .help-btn,
+            .feedback-section,
+            .intro-buttons,
+            .pause-actions,
+            .context-menu,
+            .icon-btn,
+            .toast-container {
+                display: none !important;
+            }
+
+            .modal {
+                display: none !important;
+            }
+
+            .result-container {
+                display: block !important;
+            }
+
+            .emergency-banner {
+                border: 2px solid #000 !important;
+                background: #fff !important;
+            }
+
+            .healthy-score {
+                background: #e8f5e9 !important;
+                color: #000 !important;
+                border: 1px solid #4caf50 !important;
+            }
+
+            .suggestions {
+                background: #fff8e1 !important;
+                border: 1px solid #ffc107 !important;
+            }
+
+            .result-description {
+                background: #f5f5f5 !important;
+            }
+
+            canvas {
+                display: none !important;
+            }
+        }
+
+        .container.fullscreen .header {
+            margin-bottom: 30px;
+        }
+
+        .container.fullscreen h1 {
+            font-size: 2.5rem;
+        }
+
+        .container.fullscreen .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .container.fullscreen .intro-buttons button,
+        .container.fullscreen .result-actions button {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            min-width: 150px;
+        }
+
+        button:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid #818cf8;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-contrast: high) {
+            :root {
+                --border-color: #000;
+                --text-primary: #000;
+                --text-secondary: #333;
+                --text-dark: #000;
+            }
+
+            [data-theme="dark"] {
+                --border-color: #fff;
+                --text-primary: #fff;
+                --text-secondary: #ccc;
+                --text-dark: #fff;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <h1 id="mainTitle">心理健康自测</h1>
+            <div class="header-controls">
+                <button id="fullscreenBtn" class="icon-btn" onclick="toggleFullscreen()" title="全屏模式 (F11)">⛶</button>
+                <button id="themeToggle" class="icon-btn" onclick="toggleTheme()" title="切换主题 (T)">🌓</button>
+                <button id="printBtn" class="icon-btn" onclick="printResults()" title="打印结果 (Ctrl+P)">🖨️</button>
+                <div class="language-selector">
+                    <select id="languageSelect" onchange="changeLanguage()">
+                        <option value="zh-CN">简体中文</option>
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <p class="subtitle" id="subtitle">本测试仅供参考，如有需要请咨询专业人士</p>
+
+        <!-- 介绍页面 -->
+        <div id="intro-container" class="intro-container">
+            <div class="intro-content">
+                <h2 id="introTitle">测试说明</h2>
+                <div class="intro-text" id="introText">
+                    <p>欢迎使用心理健康自测工具。本测试包含25个问题，旨在帮助您了解近期的心理状态。</p>
+                    <p><strong>测试注意事项：</strong></p>
+                    <ul>
+                        <li>请根据过去两周的实际情况作答</li>
+                        <li>答案没有对错之分，请诚实回答</li>
+                        <li>测试结果仅供参考，不能替代专业诊断</li>
+                        <li>如果您有严重的心理困扰，请立即寻求专业帮助</li>
+                    </ul>
+                </div>
+                <div class="intro-buttons">
+                    <button id="startButton" onclick="startTest()">开始测试 (S)</button>
+                    <button id="historyButton" onclick="showHistory()">查看历史记录 (H)</button>
+                    <button id="exportButton" onclick="exportData()" style="display: none;">导出数据 (E)</button>
+                    <button id="importButton" onclick="showImportDialog()" style="display: none;">导入数据 (I)</button>
+                </div>
+                <div class="quick-stats" id="quickStats" style="display: none;"></div>
+                <div class="system-info" id="systemInfo"></div>
+            </div>
+        </div>
+
+        <!-- 测试进度 -->
+        <div id="progress-container" style="display: none;">
+            <div class="progress-header">
+                <span id="progressText">问题 1 / 25</span>
+                <div class="progress-controls">
+                    <button id="pauseButton" onclick="pauseTest()" style="background: #f59e0b;">暂停 (Space)</button>
+                    <button id="saveButton" onclick="quickSave()" style="background: #10b981;">保存 (Ctrl+S)</button>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="progress-info">
+                <span id="progressPercent">0%</span>
+                <span id="timer">⏱️ 00:00</span>
+                <span id="saveStatus" style="color: #10b981; display: none;">✓ 已保存</span>
+            </div>
+        </div>
+
+        <!-- 测试问题 -->
+        <div id="quiz-container" style="display: none;">
+            <!-- 问题将通过JavaScript动态生成 -->
+        </div>
+
+        <!-- 暂停界面 -->
+        <div id="pause-container" style="display: none;" class="pause-container">
+            <h2>测试已暂停</h2>
+            <p>您的进度已保存。您可以：</p>
+            <div class="pause-actions">
+                <button onclick="resumeTest()">继续测试 (Space)</button>
+                <button onclick="saveAndExit()">保存并退出</button>
+                <button onclick="resetQuiz()">重新开始</button>
+            </div>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="result-container" id="result">
+            <h2 class="result-title" id="resultTitle">测试结果</h2>
+
+            <!-- 紧急求助提示 -->
+            <div id="emergencyBanner" class="emergency-banner" style="display: none;">
+                <div class="emergency-content">
+                    <h3>⚠️ 需要立即帮助？</h3>
+                    <p>如果您有伤害自己或他人的想法，请立即联系：</p>
+                    <div class="hotline-numbers">
+                        <a href="tel:12320" class="hotline-btn">全国心理援助热线：12320</a>
+                        <a href="tel:010-82951332" class="hotline-btn">北京心理危机干预中心：010-82951332</a>
+                        <a href="tel:021-12320-5" class="hotline-btn">上海心理援助热线：021-12320-5</a>
+                    </div>
+                    <p class="emergency-note">您并不孤单，专业帮助随时可用。</p>
+                </div>
+            </div>
+
+            <div class="result-score" id="score"></div>
+            <canvas id="resultChart" width="400" height="200" style="max-width: 100%; margin: 20px auto; display: none;"></canvas>
+            <div class="result-description" id="description"></div>
+            <div class="suggestions" id="suggestions"></div>
+
+            <div class="result-actions">
+                <button id="shareButton" onclick="shareResult()">分享结果 (Ctrl+C)</button>
+                <button id="historyButton2" onclick="showHistory()">历史记录 (H)</button>
+                <button id="resetButton" onclick="resetQuiz()">重新测试 (R)</button>
+                <button id="backButton" onclick="backToIntro()">返回主页 (Esc)</button>
+                <button id="printResultBtn" onclick="printResults()">打印 (Ctrl+P)</button>
+            </div>
+
+            <!-- 统计图表 -->
+            <div class="stats-section" id="statsSection" style="display: none;">
+                <h3 id="statsTitle">历史趋势分析</h3>
+                <canvas id="trendChart" width="600" height="250" style="max-width: 100%; margin: 20px auto;"></canvas>
+            </div>
+
+            <!-- 建议反馈 -->
+            <div class="feedback-section">
+                <h3 id="feedbackTitle">帮助我们改进</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn" onclick="submitFeedback('poor')">😞 差</button>
+                    <button class="feedback-btn" onclick="submitFeedback('fair')">😐 一般</button>
+                    <button class="feedback-btn" onclick="submitFeedback('good')">😊 良好</button>
+                    <button class="feedback-btn" onclick="submitFeedback('excellent')">😄 优秀</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录模态框 -->
+        <div id="historyModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeHistory()">&times;</span>
+                <h3 id="historyTitle">测试历史记录</h3>
+                <div class="history-actions">
+                    <button onclick="clearHistory()" style="background: #ef4444;">清除记录</button>
+                    <button onclick="exportData()" style="background: #10b981;">导出CSV</button>
+                    <button onclick="showTrendChart()" style="background: #3b82f6;">趋势图表</button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+
+        <!-- 快速帮助模态框 -->
+        <div id="helpModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeHelp()">&times;</span>
+                <h3 id="helpTitle">快速帮助</h3>
+                <div class="help-content">
+                    <h4>💡 使用提示</h4>
+                    <ul>
+                        <li>测试大约需要5-10分钟完成</li>
+                        <li>您可以随时暂停测试 (Space)</li>
+                        <li>进度会自动保存</li>
+                        <li>测试结果仅保存在您的设备本地</li>
+                    </ul>
+
+                    <h4>⌨️ 键盘快捷键</h4>
+                    <ul>
+                        <li><strong>S</strong> - 开始测试</li>
+                        <li><strong>H</strong> - 查看历史记录</li>
+                        <li><strong>T</strong> - 切换主题</li>
+                        <li><strong>Space</strong> - 暂停/继续</li>
+                        <li><strong>Ctrl+S</strong> - 快速保存</li>
+                        <li><strong>Ctrl+P</strong> - 打印结果</li>
+                        <li><strong>Ctrl+C</strong> - 复制结果</li>
+                        <li><strong>R</strong> - 重新测试</li>
+                        <li><strong>Esc</strong> - 返回主页</li>
+                        <li><strong>F11</strong> - 全屏模式</li>
+                    </ul>
+
+                    <h4>🆘 紧急情况</h4>
+                    <p>如果您感到极度痛苦或有伤害自己/他人的想法，请立即：</p>
+                    <ul>
+                        <li>拨打120急救电话</li>
+                        <li>联系当地心理危机干预中心</li>
+                        <li>前往最近的医院急诊科</li>
+                    </ul>
+
+                    <h4>📞 专业帮助资源</h4>
+                    <ul>
+                        <li>全国心理援助热线：12320</li>
+                        <li>北京心理危机干预中心：010-82951332</li>
+                        <li>上海心理援助热线：021-12320-5</li>
+                        <li>广州心理援助热线：020-81899120</li>
+                    </ul>
+
+                    <h4>📊 数据管理</h4>
+                    <ul>
+                        <li>支持导出/导入JSON备份</li>
+                        <li>CSV格式兼容Excel</li>
+                        <li>本地存储，保护隐私</li>
+                        <li>可清除历史记录</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导入数据模态框 -->
+        <div id="importModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeImportDialog()">&times;</span>
+                <h3 id="importTitle">导入数据</h3>
+                <div class="import-content">
+                    <p>选择之前导出的JSON备份文件：</p>
+                    <input type="file" id="importFile" accept=".json" style="margin: 15px 0;">
+                    <div class="import-actions">
+                        <button onclick="importData()" style="background: #10b981;">导入</button>
+                        <button onclick="closeImportDialog()" style="background: #64748b;">取消</button>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+                        注意：导入将合并到现有数据中，不会覆盖。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="quickSave()">💾 保存进度</div>
+        <div class="context-menu-item" onclick="toggleFullscreen()">⛶ 全屏模式</div>
+        <div class="context-menu-item" onclick="printResults()">🖨️ 打印结果</div>
+        <div class="context-menu-item" onclick="showHelp()">❓ 快速帮助</div>
+    </div>
+
+    <!-- 帮助按钮 -->
+    <button class="help-btn" onclick="showHelp()">?</button>
+
+    <!-- 通知容器 -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // 多语言文本定义
+        const translations = {
+            'zh-CN': {
+                mainTitle: '心理健康自测',
+                subtitle: '本测试仅供参考，如有需要请咨询专业人士',
+                introTitle: '测试说明',
+                introText: `
+                    <p>欢迎使用心理健康自测工具。本测试包含25个问题，旨在帮助您了解近期的心理状态。</p>
+                    <p><strong>测试注意事项：</strong></p>
+                    <ul>
+                        <li>请根据过去两周的实际情况作答</li>
+                        <li>答案没有对错之分，请诚实回答</li>
+                        <li>测试结果仅供参考，不能替代专业诊断</li>
+                        <li>如果您有严重的心理困扰，请立即寻求专业帮助</li>
+                    </ul>
+                `,
+                startButton: '开始测试 (S)',
+                historyButton: '查看历史记录 (H)',
+                exportButton: '导出数据 (E)',
+                importButton: '导入数据 (I)',
+                progressText: '问题 {current} / {total}',
+                progressPercent: '{percent}%',
+                resultTitle: '测试结果',
+                resetButton: '重新测试 (R)',
+                previousButton: '上一题',
+                nextButton: '下一题',
+                finishButton: '完成',
+                shareButton: '分享结果 (Ctrl+C)',
+                historyTitle: '测试历史记录',
+                healthyTitle: '您的心理很健康',
+                healthyDescription: '根据您的测试结果，您的心理健康状况良好。您偶尔可能会有一些情绪波动，这是完全正常的现象。继续保持积极的生活方式和良好的社交关系，有助于维持这种健康的心理状态。',
+                healthySuggestions: [
+                    "继续保持规律的作息时间",
+                    "坚持适量的运动",
+                    "与朋友家人保持良好的社交联系",
+                    "培养兴趣爱好，丰富生活"
+                ],
+                questions: [
+                    "过去两周内，您感到心情低落、沮丧或绝望的频率如何？",
+                    "过去两周内，您对平时感兴趣的事物失去兴趣或愉悦感的频率如何？",
+                    "过去两周内，您感到紧张、焦虑或坐立不安的频率如何？",
+                    "过去两周内，您感到疲倦或没有精力的频率如何？",
+                    "过去两周内，您食欲不振或暴饮暴食的频率如何？",
+                    "过去两周内，您对自己感到失败或让家人失望的频率如何？",
+                    "过去两周内，您注意力难以集中的频率如何？",
+                    "过去两周内，您动作或说话缓慢，或相反地坐立不安、动来动去的频率如何？",
+                    "过去两周内，您有不如死了好，或用某种方式伤害自己的念头吗？",
+                    "过去两周内，您难以入睡、睡不安稳或睡得太多的频率如何？",
+                    "过去两周内，您感到担忧，好像会有什麼坏事发生的频率如何？",
+                    "过去两周内，您变得容易烦恼或暴躁的频率如何？",
+                    "过去两周内，您的身体出现颤抖、肌肉酸痛或紧绷的频率如何？",
+                    "过去两周内，您感到心跳加快或呼吸急促的频率如何？",
+                    "过去两周内，您出汗或感到头晕的频率如何？",
+                    "过去两周内，您胃部不适或感到害怕的频率如何？",
+                    "过去两周内，您避免让自己焦虑的情况的频率如何？",
+                    "过去两周内，您感到呼吸困难或有窒息感的频率如何？",
+                    "过去两周内，您感到恶心或腹泻的频率如何？",
+                    "过去两周内，您害怕离开家的频率如何？",
+                    "过去两周内，您感到世界是不真实、梦幻或离自己好远的频率如何？",
+                    "过去两周内，您感到刺痛或麻木感的频率如何？",
+                    "过去两周内，您感到发热或发冷的频率如何？",
+                    "过去两周内，您感到胸痛或胸闷的频率如何？",
+                    "过去两周内，您害怕死亡的频率如何？"
+                ],
+                options: ["从不", "有几天", "一半以上的天数", "几乎每天"],
+                results: {
+                    title: "测试结果",
+                    mild: {
+                        description: "您的测试结果显示可能存在轻度的抑郁/焦虑倾向。这种情况在日常生活中比较常见，可能是由于近期压力较大或生活节奏变化引起的。请不必过度担心，通过适当的自我调节和生活方式的改善，通常可以得到很好的缓解。",
+                        suggestions: [
+                            "尝试深呼吸、冥想等放松技巧",
+                            "保持规律的作息时间，确保充足睡眠",
+                            "适量运动，如散步、瑜伽等",
+                            "与信任的朋友或家人分享感受",
+                            "培养新的兴趣爱好，转移注意力",
+                            "如症状持续或加重，建议咨询心理健康专业人士"
+                        ]
+                    },
+                    moderate: {
+                        description: "您的测试结果显示可能存在中度的抑郁/焦虑倾向。这种情况已经对您的生活质量产生了一定影响，建议您重视并采取积极的应对措施。请记住，寻求帮助是勇敢的表现，您并不孤单。",
+                        suggestions: [
+                            "强烈建议寻求心理健康专业人士的帮助",
+                            "考虑接受心理咨询或治疗",
+                            "学习压力管理技巧",
+                            "建立规律的作息时间",
+                            "保持适度的运动习惯",
+                            "避免酒精和咖啡因的过度摄入",
+                            "与亲友保持密切联系，寻求支持"
+                        ]
+                    },
+                    severe: {
+                        description: "您的测试结果显示可能存在较为严重的抑郁/焦虑倾向。这种情况需要您立即重视并采取积极的干预措施。我们理解您可能正在经历一段困难的时期，但请相信，通过适当的治疗和支持，情况是可以改善的。您值得获得帮助和支持。",
+                        suggestions: [
+                            "立即联系心理健康专业人士或医生",
+                            "考虑接受专业的心理治疗或药物治疗",
+                            "告知信任的家人或朋友，寻求他们的支持",
+                            "如有紧急情况，请立即联系危机干预热线",
+                            "避免独处，保持与他人的联系",
+                            "制定安全计划，确保自身安全",
+                            "记住：寻求帮助是勇敢和明智的选择"
+                        ]
+                    },
+                    depression: "抑郁倾向",
+                    anxiety: "焦虑倾向",
+                    combined: "同时存在"
+                },
+                historyEmpty: "暂无历史记录",
+                historyTitle: "测试历史记录",
+                noHistory: "您还没有进行过测试，点击开始测试按钮开始您的第一次测试吧！",
+                shareSuccess: "结果已复制到剪贴板！",
+                shareFailed: "复制失败，请手动复制",
+                emergency: "⚠️ 需要立即帮助？",
+                emergencyDesc: "如果您有伤害自己或他人的想法，请立即联系：",
+                emergencyNote: "您并不孤单，专业帮助随时可用。",
+                pauseTitle: "测试已暂停",
+                pauseDesc: "您的进度已保存。您可以：",
+                continueButton: "继续测试",
+                saveExitButton: "保存并退出",
+                backButton: "返回主页",
+                feedbackTitle: "帮助我们改进",
+                quickStats: "已进行 {count} 次测试 | 平均抑郁: {avgDep}% | 平均焦虑: {avgAnx}%",
+                helpTitle: "快速帮助",
+                exportSuccess: "数据导出成功！",
+                exportFailed: "导出失败，请重试",
+                clearHistoryConfirm: "确定要清除所有历史记录吗？此操作不可恢复。",
+                clearHistorySuccess: "历史记录已清除",
+                feedbackThanks: "感谢您的反馈！",
+                timerLabel: "⏱️",
+                pauseButton: "暂停 (Space)",
+                saveButton: "保存 (Ctrl+S)",
+                resumeButton: "继续",
+                emptyExport: "没有数据可导出",
+                importTitle: "导入数据",
+                importSuccess: "数据导入成功！",
+                importFailed: "导入失败，文件格式不正确",
+                statsTitle: "历史趋势分析",
+                trendChartTitle: "测试结果趋势图",
+                systemInfo: "系统信息",
+                fullscreenEnter: "进入全屏模式",
+                fullscreenExit: "退出全屏模式",
+                printSuccess: "打印对话框已打开",
+                printFailed: "打印功能不可用",
+                autoSave: "自动保存中...",
+                autoSaveComplete: "自动保存完成",
+                pwaInstall: "可安装为应用",
+                dataBackup: "数据备份就绪",
+                dataRestore: "数据恢复完成"
+            },
+            'zh-TW': {
+                mainTitle: '心理健康自測',
+                subtitle: '本測試僅供參考，如有需要請諮詢專業人士',
+                introTitle: '測試說明',
+                introText: `
+                    <p>歡迎使用心理健康自測工具。本測試包含25個問題，旨在幫助您了解近期的心理狀態。</p>
+                    <p><strong>測試注意事項：</strong></p>
+                    <ul>
+                        <li>請根據過去兩週的實際情況作答</li>
+                        <li>答案沒有對錯之分，請誠實回答</li>
+                        <li>測試結果僅供參考，不能替代專業診斷</li>
+                        <li>如果您有嚴重的心理困擾，請立即尋求專業幫助</li>
+                    </ul>
+                `,
+                startButton: '開始測試 (S)',
+                historyButton: '查看歷史記錄 (H)',
+                exportButton: '導出數據 (E)',
+                importButton: '導入數據 (I)',
+                progressText: '問題 {current} / {total}',
+                progressPercent: '{percent}%',
+                resultTitle: '測試結果',
+                resetButton: '重新測試 (R)',
+                previousButton: '上一題',
+                nextButton: '下一題',
+                finishButton: '完成',
+                shareButton: '分享結果 (Ctrl+C)',
+                historyTitle: '測試歷史記錄',
+                healthyTitle: '您的心理很健康',
+                healthyDescription: '根據您的測試結果，您的心理健康狀況良好。您偶爾可能會有一些情緒波動，這是完全正常的現象。繼續保持積極的生活方式和良好的社交關係，有助於維持這種健康的心理狀態。',
+                healthySuggestions: [
+                    "繼續保持規則的作息時間",
+                    "堅持適量的運動",
+                    "與朋友家人保持良好的社交聯繫",
+                    "培養興趣愛好，豐富生活"
+                ],
+                questions: [
+                    "過去兩週內，您感到心情低落、沮喪或絕望的頻率如何？",
+                    "過去兩週內，您對平時感興趣的事物失去興趣或愉悅感的頻率如何？",
+                    "過去兩週內，您感到緊張、焦慮或坐立不安的頻率如何？",
+                    "過去兩週內，您感到疲倦或沒有精力的頻率如何？",
+                    "過去兩週內，您食欲不振或暴飲暴食的頻率如何？",
+                    "過去兩週內，您對自己感到失敗或讓家人失望的頻率如何？",
+                    "過去兩週內，您注意力難以集中的頻率如何？",
+                    "過去兩週內，您動作或說話緩慢，或相反地坐立不安、動來動去的頻率如何？",
+                    "過去兩週內，您有不如死了好，或用某種方式傷害自己的念頭嗎？",
+                    "過去兩週內，您難以入睡、睡不安穩或睡得太多的頻率如何？",
+                    "過去兩週內，您感到擔憂，好像會有什麼壞事發生的頻率如何？",
+                    "過去兩週內，您變得容易煩惱或暴躁的頻率如何？",
+                    "過去兩週內，您的身體出現顫抖、肌肉酸痛或緊繃的頻率如何？",
+                    "過去兩週內，您感到心跳加快或呼吸急促的頻率如何？",
+                    "過去兩週內，您出汗或感到頭暈的頻率如何？",
+                    "過去兩週內，您胃部不適或感到害怕的頻率如何？",
+                    "過去兩週內，您避免讓自己焦慮的情況的頻率如何？",
+                    "過去兩週內，您感到呼吸困難或有窒息感的頻率如何？",
+                    "過去兩週內，您感到噁心或腹瀉的頻率如何？",
+                    "過去兩週內，您害怕離開家的頻率如何？",
+                    "過去兩週內，您感到世界是不真實、夢幻或離自己好遠的頻率如何？",
+                    "過去兩週內，您感到刺痛或麻木感的頻率如何？",
+                    "過去兩週內，您感到發熱或發冷的頻率如何？",
+                    "過去兩週內，您感到胸痛或胸悶的頻率如何？",
+                    "過去兩週內，您害怕死亡的頻率如何？"
+                ],
+                options: ["從不", "有幾天", "一半以上的天數", "幾乎每天"],
+                results: {
+                    title: "測試結果",
+                    mild: {
+                        description: "您的測試結果顯示可能存在輕度的抑鬱/焦慮傾向。這種情況在日常生活中比較常見，可能是由於近期壓力較大或生活節奏變化引起的。請不必過度擔心，透過適當的自我調節和生活方式的改善，通常可以得到很好的緩解。",
+                        suggestions: [
+                            "嘗試深呼吸、冥想等放鬆技巧",
+                            "保持規則的作息時間，確保充足睡眠",
+                            "適量運動，如散步、瑜伽等",
+                            "與信任的朋友或家人分享感受",
+                            "培養新的興趣愛好，轉移注意力",
+                            "如症狀持續或加重，建議諮詢心理健康專業人士"
+                        ]
+                    },
+                    moderate: {
+                        description: "您的測試結果顯示可能存在中度的抑鬱/焦慮傾向。這種情況已經對您的生活品質產生了一定影響，建議您重視並採取積極的應對措施。請記住，尋求幫助是勇敢的表現，您並不孤單。",
+                        suggestions: [
+                            "強烈建議尋求心理健康專業人士的幫助",
+                            "考慮接受心理諮詢或治療",
+                            "學習壓力管理技巧",
+                            "建立規則的作息時間",
+                            "保持適度的運動習慣",
+                            "避免酒精和咖啡因的過度攝入",
+                            "與親友保持密切聯繫，尋求支持"
+                        ]
+                    },
+                    severe: {
+                        description: "您的測試結果顯示可能存在較為嚴重的抑鬱/焦慮傾向。這種情況需要您立即重視並採取積極的干預措施。我們理解您可能正在經歷一段困難的時期，但請相信，透過適當的治療和支援，情況是可以改善的。您值得獲得幫助和支持。",
+                        suggestions: [
+                            "立即聯繫心理健康專業人士或醫生",
+                            "考慮接受專業的心理治療或藥物治療",
+                            "告知信任的家人或朋友，尋求他們的支持",
+                            "如有緊急情況，請立即聯繫危機干預熱線",
+                            "避免獨處，保持與他人的聯繫",
+                            "制定安全計劃，確保自身安全",
+                            "記住：尋求幫助是勇敢和明智的選擇"
+                        ]
+                    },
+                    depression: "抑鬱傾向",
+                    anxiety: "焦慮傾向",
+                    combined: "同時存在"
+                },
+                historyEmpty: "暫無歷史記錄",
+                historyTitle: "測試歷史記錄",
+                noHistory: "您還沒有進行過測試，點擊開始測試按鈕開始您的第一次測試吧！",
+                shareSuccess: "結果已複製到剪貼簿！",
+                shareFailed: "複製失敗，請手動複製",
+                emergency: "⚠️ 需要立即幫助？",
+                emergencyDesc: "如果您有傷害自己或他人的想法，請立即聯繫：",
+                emergencyNote: "您並不孤單，專業幫助隨時可用。",
+                pauseTitle: "測試已暫停",
+                pauseDesc: "您的進度已保存。您可以：",
+                continueButton: "繼續測試",
+                saveExitButton: "保存並退出",
+                backButton: "返回主頁",
+                feedbackTitle: "幫助我們改進",
+                quickStats: "已進行 {count} 次測試 | 平均抑鬱: {avgDep}% | 平均焦慮: {avgAnx}%",
+                helpTitle: "快速幫助",
+                exportSuccess: "數據導出成功！",
+                exportFailed: "導出失敗，請重試",
+                clearHistoryConfirm: "確定要清除所有歷史記錄嗎？此操作不可恢復。",
+                clearHistorySuccess: "歷史記錄已清除",
+                feedbackThanks: "感謝您的反饋！",
+                timerLabel: "⏱️",
+                pauseButton: "暫停 (Space)",
+                saveButton: "保存 (Ctrl+S)",
+                resumeButton: "繼續",
+                emptyExport: "沒有數據可導出",
+                importTitle: "導入數據",
+                importSuccess: "數據導入成功！",
+                importFailed: "導入失敗，文件格式不正確",
+                statsTitle: "歷史趨勢分析",
+                trendChartTitle: "測試結果趨勢圖",
+                systemInfo: "系統信息",
+                fullscreenEnter: "進入全屏模式",
+                fullscreenExit: "退出全屏模式",
+                printSuccess: "打印對話框已打開",
+                printFailed: "打印功能不可用",
+                autoSave: "自動保存中...",
+                autoSaveComplete: "自動保存完成",
+                pwaInstall: "可安裝為應用",
+                dataBackup: "數據備份就緒",
+                dataRestore: "數據恢復完成"
+            },
+            'ja': {
+                mainTitle: 'メンタルヘルスセルフチェック',
+                subtitle: 'このテストは参考用です。必要に応じて専門家にご相談ください',
+                introTitle: 'テスト説明',
+                introText: `
+                    <p>メンタルヘルスセルフチェックへようこそ。このテストには25の質問があり、最近の精神状態を理解するのに役立ちます。</p>
+                    <p><strong>テスト注意事项：</strong></p>
+                    <ul>
+                        <li>過去2週間の実際の状況に基づいて回答してください</li>
+                        <li>答えに正解不正解はありません。正直に回答してください</li>
+                        <li>テスト結果は参考用であり、専門診断の代わりにはなりません</li>
+                        <li>深刻な精神的苦痛がある場合は、直ちに専門家にご相談ください</li>
+                    </ul>
+                `,
+                startButton: 'テストを開始 (S)',
+                historyButton: '履歴を表示 (H)',
+                exportButton: 'データをエクスポート (E)',
+                importButton: 'データをインポート (I)',
+                progressText: '質問 {current} / {total}',
+                progressPercent: '{percent}%',
+                resultTitle: 'テスト結果',
+                resetButton: '再テスト (R)',
+                previousButton: '前へ',
+                nextButton: '次へ',
+                finishButton: '完了',
+                shareButton: '結果を共有 (Ctrl+C)',
+                historyTitle: 'テスト履歴',
+                healthyTitle: 'あなたの心理はとても健康です',
+                healthyDescription: 'テスト結果によると、あなたのメンタルヘルスは良好です。たまに気分の浮き沈みがあるかもしれませんが、それは完全に normal な現象です。引き続き積極的な生活スタイルと良好的な社会関係を保つことで、この健康な精神状態を維持できます。',
+                healthySuggestions: [
+                    "規則正しい生活リズムを保ちましょう",
+                    "適度な運動を続けましょう",
+                    "友人や家族と良好な社会的つながりを保ちましょう",
+                    "趣味や娯楽を育み、生活を豊かにしましょう"
+                ],
+                questions: [
+                    "過去2週間、気分が落ち込んだり、絶望感を感じたりする頻度は？",
+                    "過去2週間、普段興味のあるものに興味や喜びを感じられなくなる頻度は？",
+                    "過去2週間、緊張、不安、落ち着かない感じを経験する頻度は？",
+                    "過去2週間、疲れた感じや元気がない感じを経験する頻度は？",
+                    "過去2週間、食欲がない、または過剰に食べる頻度は？",
+                    "過去2週間、自分に失敗したと感じたり、家族を失望させたと感じたりする頻度は？",
+                    "過去2週間、集中できない頻度は？",
+                    "過去2週間、動きや話し方が遅くなる、または逆に落ち着かない、動きたくなる頻度は？",
+                    "過去2週間、死んだほうがいい、または自分を傷つけるような考えが浮かぶ頻度は？",
+                    "過去2週間、眠れない、眠りが浅い、または寝すぎる頻度は？",
+                    "過去2週間、心配で、何か悪いことが起こりそうな感じを経験する頻度は？",
+                    "過去2週間、イライラしやすくなる、または怒りっぽくなる頻度は？",
+                    "過去2週間、体が震える、筋肉が痛い、または緊張する頻度は？",
+                    "過去2週間、心臓が早い、または呼吸が早くなる頻度は？",
+                    "過去2週間、汗をかく、またはめまいを感じる頻度は？",
+                    "過去2週間、吐き気やお腹の不快感、または恐怖を感じる頻度は？",
+                    "過去2週間、不安を感じる状況を避ける頻度は？",
+                    "過去2週間、呼吸困難、または窒息感を感じる頻度は？",
+                    "過去2週間、吐き気や下痢を感じる頻度は？",
+                    "過去2週間、家を出るのが怖い頻度は？",
+                    "過去2週間、世界が現実でない、夢のような、遠く感じられる頻度は？",
+                    "過去2週間、刺すような痛みや麻痺感を感じる頻度は？",
+                    "過去2週間、熱っぽい、または寒気がする頻度は？",
+                    "過去2週間、胸の痛みや胸の圧迫感を感じる頻度は？",
+                    "過去2週間、死ぬのが怖い頻度は？"
+                ],
+                options: ["全くない", "数日間", "半分以上の日数", "ほとんど毎日"],
+                results: {
+                    title: "テスト結果",
+                    mild: {
+                        description: "テスト結果によると、軽度のうつ病・不安傾向がある可能性があります。这种情况は日常生活中で比較的よく見られるもので、最近のストレスが大きいことや生活リズムの変化が原因かもしれません。過剰に心配する必要はありません。適切な自己調整と生活習慣の改善で、通常は很好地缓解できます。",
+                        suggestions: [
+                            "深呼吸や瞑想などのリラクゼーション技法を試してみましょう",
+                            "規則正しい生活リズムを保ち、十分な睡眠を取りましょう",
+                            "適度な運動（散歩、ヨガなど）をしましょう",
+                            "信頼できる友人や家族に気持ちを話してみましょう",
+                            "新しい趣味や娯楽を育み、注意を転換しましょう",
+                            "症状が続く場合や悪化する場合は、メンタルヘルスの専門家に相談することをお勧めします"
+                        ]
+                    },
+                    moderate: {
+                        description: "テスト結果によると、中程度のうつ病・不安傾向がある可能性があります。这种情况はあなたの生活の質に一定の影響を与えています。重要視し、積極的な対応措置を取ることをお勧めします。助け求めることは勇敢なことであり、あなたは一人ではありません。",
+                        suggestions: [
+                            "メンタルヘルス専門家からの助けを強くお勧めします",
+                            "カウンセリングや治療を受けることを検討しましょう",
+                            "ストレス管理技法を学びましょう",
+                            "規則正しい生活リズムを確立しましょう",
+                            "適度な運動習慣を保ちましょう",
+                            "アルコールやカフェインの過剰摂取を避けましょう",
+                            "親しい友人や家族と密接な連絡を取り、サポートを求めましょう"
+                        ]
+                    },
+                    severe: {
+                        description: "テスト結果によると、より深刻なうつ病・不安傾向がある可能性があります。这种情况は直ちに重要視し、積極的な介入措置を取る必要があります。困難な時期を経験しているかもしれませんが、適切な治療とサポートにより、状況は改善できます。あなたは助けとサポートに値します。",
+                        suggestions: [
+                            "直ちにメンタルヘルス専門家や医師に連絡してください",
+                            "専門的な心理治療や薬物治療を受けることを検討してください",
+                            "信頼できる家族や友人に伝え、彼らのサポートを求めましょう",
+                            "緊急の場合は、危機介入ホットラインに直ちに連絡してください",
+                            "一人でいることを避け、他の人とのつながりを保ちましょう",
+                            "自身の安全を確保するための安全計画を立てましょう",
+                            "助け求めることは勇敢で賢明な選択であることを覚えていてください"
+                        ]
+                    },
+                    depression: "うつ病傾向",
+                    anxiety: "不安傾向",
+                    combined: "同時に"
+                },
+                historyEmpty: "履歴なし",
+                historyTitle: "テスト履歴",
+                noHistory: "まだテストを行っていません。テスト開始ボタンをクリックして、最初のテストを始めてください！",
+                shareSuccess: "結果をクリップボードにコピーしました！",
+                shareFailed: "コピーに失敗しました。手動でコピーしてください",
+                emergency: "⚠️ すぐに支援が必要ですか？",
+                emergencyDesc: "自分や他人を傷つけるような考えがある場合は、すぐに連絡してください：",
+                emergencyNote: "あなたは一人ではありません。専門家の支援が常に利用可能です。",
+                pauseTitle: "テスト中断中",
+                pauseDesc: "進捗は保存されています。操作を選択してください：",
+                continueButton: "テストを続ける",
+                saveExitButton: "保存して終了",
+                backButton: "ホームに戻る",
+                feedbackTitle: "改善にご協力ください",
+                quickStats: "テスト回数: {count}回 | 平均うつ: {avgDep}% | 平均不安: {avgAnx}%",
+                helpTitle: "クイックヘルプ",
+                exportSuccess: "データをエクスポートしました！",
+                exportFailed: "エクスポートに失敗しました",
+                clearHistoryConfirm: "すべての履歴を削除しますか？この操作は元に戻せません。",
+                clearHistorySuccess: "履歴を削除しました",
+                feedbackThanks: "ごフィードバックありがとうございます！",
+                timerLabel: "⏱️",
+                pauseButton: "中断 (Space)",
+                saveButton: "保存 (Ctrl+S)",
+                resumeButton: "続行",
+                emptyExport: "エクスポートするデータがありません",
+                importTitle: "データをインポート",
+                importSuccess: "データをインポートしました！",
+                importFailed: "インポート失敗：ファイル形式が正しくありません",
+                statsTitle: "履歴傾向分析",
+                trendChartTitle: "テスト結果の傾向",
+                systemInfo: "システム情報",
+                fullscreenEnter: "フルスクリーンモード",
+                fullscreenExit: "フルスクリーン終了",
+                printSuccess: "印刷ダイアログを開きました",
+                printFailed: "印刷機能を使用できません",
+                autoSave: "自動保存中...",
+                autoSaveComplete: "自動保存完了",
+                pwaInstall: "アプリとしてインストール可能",
+                dataBackup: "データバックアップ完了",
+                dataRestore: "データ復元完了"
+            },
+            'en': {
+                mainTitle: 'Mental Health Self-Test',
+                subtitle: 'This test is for reference only. Please consult a professional if needed',
+                introTitle: 'Test Instructions',
+                introText: `
+                    <p>Welcome to the Mental Health Self-Test. This test contains 25 questions designed to help you understand your recent mental state.</p>
+                    <p><strong>Test Guidelines:</strong></p>
+                    <ul>
+                        <li>Please answer based on your actual situation over the past 2 weeks</li>
+                        <li>There are no right or wrong answers - please be honest</li>
+                        <li>Test results are for reference only and cannot replace professional diagnosis</li>
+                        <li>If you have serious mental health concerns, please seek professional help immediately</li>
+                    </ul>
+                `,
+                startButton: 'Start Test (S)',
+                historyButton: 'View History (H)',
+                exportButton: 'Export Data (E)',
+                importButton: 'Import Data (I)',
+                progressText: 'Question {current} / {total}',
+                progressPercent: '{percent}%',
+                resultTitle: 'Test Results',
+                resetButton: 'Retake Test (R)',
+                previousButton: 'Previous',
+                nextButton: 'Next',
+                finishButton: 'Finish',
+                shareButton: 'Share Results (Ctrl+C)',
+                historyTitle: 'Test History',
+                healthyTitle: 'Your mental health is excellent',
+                healthyDescription: 'According to your test results, your mental health is in excellent condition. You may occasionally experience some mood swings, which is completely normal. Continuing to maintain a positive lifestyle and good social relationships will help sustain this healthy mental state.',
+                healthySuggestions: [
+                    "Continue to maintain a regular sleep schedule",
+                    "Keep up with适量 exercise",
+                    "Maintain good social connections with friends and family",
+                    "Cultivate hobbies and interests to enrich your life"
+                ],
+                questions: [
+                    "In the past 2 weeks, how often have you felt down, depressed, or hopeless?",
+                    "In the past 2 weeks, how often have you lost interest or pleasure in activities you usually enjoy?",
+                    "In the past 2 weeks, how often have you felt nervous, anxious, or on edge?",
+                    "In the past 2 weeks, how often have you felt tired or having little energy?",
+                    "In the past 2 weeks, how often have you had little appetite or overeaten?",
+                    "In the past 2 weeks, how often have you felt like a failure or that you've let yourself or your family down?",
+                    "In the past 2 weeks, how often have you had trouble concentrating on things?",
+                    "In the past 2 weeks, how often have you been moving or speaking so slowly that other people noticed, or the opposite - being so fidgety or restless that you've been moving around a lot more than usual?",
+                    "In the past 2 weeks, how often have you had thoughts that you would be better off dead or of hurting yourself in some way?",
+                    "In the past 2 weeks, how often have you had trouble falling or staying asleep, or sleeping too much?",
+                    "In the past 2 weeks, how often have you felt worried, as if something bad might happen?",
+                    "In the past 2 weeks, how often have you become easily annoyed or irritable?",
+                    "In the past 2 weeks, how often have you experienced trembling, muscle aches, or tension?",
+                    "In the past 2 weeks, how often have you felt your heart racing or having trouble breathing?",
+                    "In the past 2 weeks, how often have you experienced sweating or dizziness?",
+                    "In the past 2 weeks, how often have you had stomach discomfort or felt afraid?",
+                    "In the past 2 weeks, how often have you avoided situations that make you anxious?",
+                    "In the past 2 weeks, how often have you felt short of breath or had a choking sensation?",
+                    "In the past 2 weeks, how often have you felt nauseous or had diarrhea?",
+                    "In the past 2 weeks, how often have you been afraid to leave your home?",
+                    "In the past 2 weeks, how often have you felt that the world is unreal, dreamlike, or far away?",
+                    "In the past 2 weeks, how often have you felt tingling or numbness?",
+                    "In the past 2 weeks, how often have you felt hot or cold?",
+                    "In the past 2 weeks, how often have you experienced chest pain or tightness?",
+                    "In the past 2 weeks, how often have you been afraid of dying?"
+                ],
+                options: ["Not at all", "Several days", "More than half the days", "Nearly every day"],
+                results: {
+                    title: "Test Results",
+                    mild: {
+                        description: "Your test results indicate a possible mild tendency toward depression/anxiety. This situation is relatively common in daily life and may be caused by recent stress or changes in life rhythm. Don't worry too much; through appropriate self-regulation and lifestyle improvements, relief can usually be achieved.",
+                        suggestions: [
+                            "Try relaxation techniques such as deep breathing or meditation",
+                            "Maintain a regular sleep schedule and ensure adequate sleep",
+                            "Engage in适量 exercise, such as walking or yoga",
+                            "Share your feelings with trusted friends or family",
+                            "Cultivate new hobbies or interests to shift your focus",
+                            "If symptoms persist or worsen, consider consulting a mental health professional"
+                        ]
+                    },
+                    moderate: {
+                        description: "Your test results indicate a possible moderate tendency toward depression/anxiety. This situation has already affected your quality of life to some extent. We recommend you take it seriously and adopt positive coping measures. Remember, seeking help is a sign of strength, and you are not alone.",
+                        suggestions: [
+                            "Strongly recommend seeking help from a mental health professional",
+                            "Consider receiving counseling or therapy",
+                            "Learn stress management techniques",
+                            "Establish a regular daily routine",
+                            "Maintain适度 exercise habits",
+                            "Avoid excessive alcohol and caffeine intake",
+                            "Stay in close contact with friends and family for support"
+                        ]
+                    },
+                    severe: {
+                        description: "Your test results indicate a possible serious tendency toward depression/anxiety. This situation requires your immediate attention and active intervention measures. We understand you might be going through a difficult period, but please believe that with appropriate treatment and support, the situation can improve. You deserve help and support.",
+                        suggestions: [
+                            "Contact a mental health professional or doctor immediately",
+                            "Consider receiving professional psychotherapy or medication treatment",
+                            "Inform trusted family or friends and seek their support",
+                            "If in crisis, contact a crisis intervention hotline immediately",
+                            "Avoid being alone; maintain connections with others",
+                            "Develop a safety plan to ensure your personal safety",
+                            "Remember: Seeking help is a brave and wise choice"
+                        ]
+                    },
+                    depression: "depression tendency",
+                    anxiety: "anxiety tendency",
+                    combined: "and also"
+                },
+                historyEmpty: "No history",
+                historyTitle: "Test History",
+                noHistory: "You haven't taken a test yet. Click the Start Test button to begin your first test!",
+                shareSuccess: "Results copied to clipboard!",
+                shareFailed: "Copy failed, please copy manually",
+                emergency: "⚠️ Need immediate help?",
+                emergencyDesc: "If you have thoughts of harming yourself or others, please contact immediately:",
+                emergencyNote: "You are not alone. Professional help is always available.",
+                pauseTitle: "Test Paused",
+                pauseDesc: "Your progress has been saved. You can:",
+                continueButton: "Continue Test",
+                saveExitButton: "Save and Exit",
+                backButton: "Back to Home",
+                feedbackTitle: "Help Us Improve",
+                quickStats: "Tests taken: {count} | Avg Depression: {avgDep}% | Avg Anxiety: {avgAnx}%",
+                helpTitle: "Quick Help",
+                exportSuccess: "Data exported successfully!",
+                exportFailed: "Export failed",
+                clearHistoryConfirm: "Are you sure you want to clear all history? This cannot be undone.",
+                clearHistorySuccess: "History cleared",
+                feedbackThanks: "Thank you for your feedback!",
+                timerLabel: "⏱️",
+                pauseButton: "Pause (Space)",
+                saveButton: "Save (Ctrl+S)",
+                resumeButton: "Resume",
+                emptyExport: "No data to export",
+                importTitle: "Import Data",
+                importSuccess: "Data imported successfully!",
+                importFailed: "Import failed: Invalid file format",
+                statsTitle: "History Trend Analysis",
+                trendChartTitle: "Test Result Trends",
+                systemInfo: "System Information",
+                fullscreenEnter: "Enter Fullscreen",
+                fullscreenExit: "Exit Fullscreen",
+                printSuccess: "Print dialog opened",
+                printFailed: "Print unavailable",
+                autoSave: "Auto-saving...",
+                autoSaveComplete: "Auto-save complete",
+                pwaInstall: "Installable as app",
+                dataBackup: "Data backup ready",
+                dataRestore: "Data restored"
+            }
+        };
+
+        // 选项分数
+        const optionScores = [0, 1, 2, 3];
+        const specialScores = [0, 3, 5, 7];
+
+        // 全局变量
+        let currentLang = 'zh-CN';
+        let questions = [];
+        let currentQuestion = 0;
+        let answers = [];
+        let selectedOption = null;
+        let testHistory = [];
+        let feedbackHistory = [];
+        let currentTheme = 'light';
+        let testStartTime = null;
+        let timerInterval = null;
+        let isPaused = false;
+        let pausedTime = 0;
+        let autoSaveInterval = null;
+        let isFullscreen = false;
+
+        // 初始化
+        function init() {
+            loadSettings();
+            initQuestions();
+            updateUIText();
+            renderIntro();
+            updateQuickStats();
+            updateSystemInfo();
+            setupKeyboardShortcuts();
+            setupContextMenu();
+            setupAutoSave();
+            setupPWA();
+
+            // 检测系统主题偏好
+            if (window.matchMedia && !localStorage.getItem('theme')) {
+                const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkModeQuery.matches) {
+                    toggleTheme();
+                }
+                darkModeQuery.addEventListener('change', (e) => {
+                    if (!localStorage.getItem('theme')) {
+                        currentTheme = e.matches ? 'dark' : 'light';
+                        document.body.setAttribute('data-theme', currentTheme);
+                        updateThemeIcon();
+                    }
+                });
+            }
+        }
+
+        // 加载设置
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                document.body.setAttribute('data-theme', currentTheme);
+                updateThemeIcon();
+            }
+
+            const savedHistory = localStorage.getItem('testHistory');
+            if (savedHistory) {
+                testHistory = JSON.parse(savedHistory);
+            }
+
+            const savedFeedback = localStorage.getItem('feedbackHistory');
+            if (savedFeedback) {
+                feedbackHistory = JSON.parse(savedFeedback);
+            }
+
+            const savedLang = localStorage.getItem('language');
+            if (savedLang) {
+                currentLang = savedLang;
+                document.getElementById('languageSelect').value = savedLang;
+            }
+
+            // 加载暂停状态
+            const pausedState = localStorage.getItem('pausedTest');
+            if (pausedState) {
+                const paused = JSON.parse(pausedState);
+                if (paused.isPaused) {
+                    if (confirm('检测到未完成的测试，是否继续？')) {
+                        restorePausedTest(paused);
+                    } else {
+                        localStorage.removeItem('pausedTest');
+                    }
+                }
+            }
+
+            // 恢复快速保存
+            setTimeout(() => {
+                if (restoreQuickSave()) {
+                    showToast('已恢复未完成的测试', 'info');
+                }
+            }, 1000);
+        }
+
+        // 保存设置
+        function saveSettings() {
+            localStorage.setItem('theme', currentTheme);
+            localStorage.setItem('language', currentLang);
+            localStorage.setItem('testHistory', JSON.stringify(testHistory));
+            localStorage.setItem('feedbackHistory', JSON.stringify(feedbackHistory));
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
+            saveSettings();
+        }
+
+        // 更新主题图标
+        function updateThemeIcon() {
+            const icon = document.getElementById('themeToggle');
+            if (icon) {
+                icon.textContent = currentTheme === 'dark' ? '☀️' : '🌓';
+            }
+        }
+
+        // 显示通知
+        function showToast(message, type = 'success', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) {
+                const newContainer = document.createElement('div');
+                newContainer.id = 'toastContainer';
+                newContainer.className = 'toast-container';
+                document.body.appendChild(newContainer);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.getElementById('toastContainer').appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.parentElement.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // 更新UI文本
+        function updateUIText() {
+            const texts = translations[currentLang];
+            document.getElementById('mainTitle').textContent = texts.mainTitle;
+            document.getElementById('subtitle').textContent = texts.subtitle;
+            document.getElementById('introTitle').textContent = texts.introTitle;
+            document.getElementById('introText').innerHTML = texts.introText;
+            document.getElementById('startButton').textContent = texts.startButton;
+            document.getElementById('historyButton').textContent = texts.historyButton;
+            document.getElementById('exportButton').textContent = texts.exportButton;
+            document.getElementById('importButton').textContent = texts.importButton;
+            document.getElementById('resultTitle').textContent = texts.resultTitle;
+            document.getElementById('resetButton').textContent = texts.resetButton;
+            document.getElementById('shareButton').textContent = texts.shareButton;
+            document.getElementById('historyTitle').textContent = texts.historyTitle;
+            document.getElementById('historyButton2').textContent = texts.historyButton;
+            document.getElementById('backButton').textContent = texts.backButton;
+            document.getElementById('feedbackTitle').textContent = texts.feedbackTitle;
+            document.getElementById('helpTitle').textContent = texts.helpTitle;
+            document.getElementById('pauseButton').textContent = texts.pauseButton;
+            document.getElementById('saveButton').textContent = texts.saveButton;
+            document.getElementById('statsTitle').textContent = texts.statsTitle;
+            document.getElementById('importTitle').textContent = texts.importTitle;
+
+            // 更新按钮显示
+            const exportBtn = document.getElementById('exportButton');
+            const importBtn = document.getElementById('importButton');
+            if (testHistory.length > 0) {
+                exportBtn.style.display = 'inline-block';
+                importBtn.style.display = 'inline-block';
+            }
+        }
+
+        // 更新系统信息
+        function updateSystemInfo() {
+            const info = document.getElementById('systemInfo');
+            if (!info) return;
+
+            const platform = navigator.platform || 'Unknown';
+            const language = navigator.language || 'Unknown';
+            const date = new Date().toLocaleString(currentLang);
+
+            info.textContent = `平台: ${platform} | 语言: ${language} | ${date}`;
+        }
+
+        // 语言切换
+        function changeLanguage() {
+            const select = document.getElementById('languageSelect');
+            currentLang = select.value;
+            saveSettings();
+            updateUIText();
+            updateQuickStats();
+            updateSystemInfo();
+
+            // 重新渲染当前界面
+            if (document.getElementById('quiz-container').style.display !== 'none') {
+                renderQuestion();
+            }
+            if (document.getElementById('result').classList.contains('active')) {
+                showResult();
+            }
+            if (document.getElementById('historyModal').style.display === 'block') {
+                showHistory();
+            }
+            if (document.getElementById('helpModal').style.display === 'block') {
+                showHelp();
+            }
+            if (document.getElementById('importModal').style.display === 'block') {
+                showImportDialog();
+            }
+        }
+
+        // 更新快速统计
+        function updateQuickStats() {
+            const stats = document.getElementById('quickStats');
+            if (testHistory.length === 0) {
+                stats.style.display = 'none';
+                return;
+            }
+
+            const texts = translations[currentLang];
+            const totalTests = testHistory.length;
+            const avgDep = Math.round(testHistory.reduce((sum, item) => sum + item.depression, 0) / totalTests);
+            const avgAnx = Math.round(testHistory.reduce((sum, item) => sum + item.anxiety, 0) / totalTests);
+
+            stats.style.display = 'block';
+            stats.textContent = texts.quickStats
+                .replace('{count}', totalTests)
+                .replace('{avgDep}', avgDep)
+                .replace('{avgAnx}', avgAnx);
+        }
+
+        // 渲染介绍页面
+        function renderIntro() {
+            document.getElementById('intro-container').style.display = 'block';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('pause-container').style.display = 'none';
+            document.getElementById('result').classList.remove('active');
+            updateQuickStats();
+        }
+
+        // 开始测试
+        function startTest() {
+            document.getElementById('intro-container').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+
+            currentQuestion = 0;
+            answers = [];
+            selectedOption = null;
+            isPaused = false;
+            testStartTime = Date.now();
+            pausedTime = 0;
+
+            renderQuestion();
+            updateProgress();
+            startTimer();
+            startAutoSave();
+        }
+
+        // 开始计时器
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    const elapsed = Math.floor((Date.now() - testStartTime - pausedTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    document.getElementById('timer').textContent = `⏱️ ${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        // 开始自动保存
+        function startAutoSave() {
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+
+            autoSaveInterval = setInterval(() => {
+                if (!isPaused && answers.length > 0) {
+                    quickSave(true);
+                }
+            }, 30000); // 每30秒自动保存
+        }
+
+        // 快速保存
+        function quickSave(isAuto = false) {
+            const texts = translations[currentLang];
+            if (answers.length === 0) return;
+
+            const saveData = {
+                currentQuestion: currentQuestion,
+                answers: answers,
+                selectedOption: selectedOption,
+                testStartTime: testStartTime,
+                pausedTime: pausedTime,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('quickSave', JSON.stringify(saveData));
+
+            if (!isAuto) {
+                const status = document.getElementById('saveStatus');
+                status.style.display = 'inline';
+                status.textContent = '✓ ' + (texts.autoSaveComplete || '已保存');
+                setTimeout(() => status.style.display = 'none', 2000);
+                showToast(texts.autoSaveComplete || '保存成功', 'success');
+            } else {
+                showToast(texts.autoSave || '自动保存中...', 'info', 1500);
+            }
+        }
+
+        // 恢复快速保存
+        function restoreQuickSave() {
+            const saveData = localStorage.getItem('quickSave');
+            if (!saveData) return false;
+
+            try {
+                const data = JSON.parse(saveData);
+                if (confirm('检测到未完成的测试，是否继续？')) {
+                    currentQuestion = data.currentQuestion;
+                    answers = data.answers;
+                    selectedOption = data.selectedOption;
+                    testStartTime = data.testStartTime;
+                    pausedTime = data.pausedTime || 0;
+
+                    document.getElementById('intro-container').style.display = 'none';
+                    document.getElementById('progress-container').style.display = 'block';
+                    document.getElementById('quiz-container').style.display = 'block';
+
+                    isPaused = false;
+                    renderQuestion();
+                    updateProgress();
+                    startTimer();
+                    startAutoSave();
+
+                    localStorage.removeItem('quickSave');
+                    return true;
+                }
+            } catch (e) {
+                console.error('恢复快速保存失败', e);
+            }
+            return false;
+        }
+
+        // 暂停测试
+        function pauseTest() {
+            isPaused = true;
+            const pauseTime = Date.now();
+
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('pause-container').style.display = 'block';
+
+            const pausedState = {
+                isPaused: true,
+                pauseTime: pauseTime,
+                currentQuestion: currentQuestion,
+                answers: answers,
+                selectedOption: selectedOption,
+                testStartTime: testStartTime,
+                pausedTime: pausedTime
+            };
+            localStorage.setItem('pausedTest', JSON.stringify(pausedState));
+        }
+
+        // 恢复测试
+        function resumeTest() {
+            isPaused = false;
+            document.getElementById('pause-container').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+
+            renderQuestion();
+            updateProgress();
+            startTimer();
+        }
+
+        // 保存并退出
+        function saveAndExit() {
+            const texts = translations[currentLang];
+            if (confirm(texts.saveExitButton + '?')) {
+                showToast('测试进度已保存！', 'info');
+                if (timerInterval) clearInterval(timerInterval);
+                if (autoSaveInterval) clearInterval(autoSaveInterval);
+                localStorage.removeItem('pausedTest');
+                renderIntro();
+            }
+        }
+
+        // 恢复暂停的测试
+        function restorePausedTest(paused) {
+            currentQuestion = paused.currentQuestion;
+            answers = paused.answers;
+            selectedOption = paused.selectedOption;
+            testStartTime = paused.testStartTime;
+            pausedTime = paused.pausedTime;
+
+            document.getElementById('intro-container').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('pause-container').style.display = 'none';
+
+            isPaused = false;
+            renderQuestion();
+            updateProgress();
+            startTimer();
+            startAutoSave();
+
+            localStorage.removeItem('pausedTest');
+        }
+
+        // 初始化问题
+        function initQuestions() {
+            questions = translations[currentLang].questions.map((question, index) => {
+                const scores = index === 8 ? specialScores : optionScores;
+                return {
+                    question: question,
+                    options: translations[currentLang].options,
+                    scores: scores
+                };
+            });
+        }
+
+        // 渲染问题
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const question = questions[currentQuestion];
+            const texts = translations[currentLang];
+
+            const prevText = texts.previousButton;
+            const nextText = currentQuestion === questions.length - 1 ? texts.finishButton : texts.nextButton;
+
+            container.innerHTML = `
+                <div class="question-container active">
+                    <h3 class="question">${currentQuestion + 1}. ${question.question}</h3>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <div class="option" onclick="selectOption(${index})" data-index="${index}">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="buttons">
+                        <button onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>${prevText}</button>
+                        <button onclick="nextQuestion()" ${selectedOption === null ? 'disabled' : ''}>${nextText}</button>
+                    </div>
+                </div>
+            `;
+
+            if (selectedOption !== null) {
+                selectOption(selectedOption);
+            }
+        }
+
+        // 选择选项
+        function selectOption(index) {
+            selectedOption = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, i) => {
+                if (i === index) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+
+            const nextButton = document.querySelector('button[onclick="nextQuestion()"]');
+            if (nextButton) {
+                nextButton.disabled = false;
+            }
+        }
+
+        // 上一题
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = answers[currentQuestion] !== undefined ? answers[currentQuestion] : null;
+                renderQuestion();
+                updateProgress();
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (selectedOption !== null) {
+                answers[currentQuestion] = selectedOption;
+
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    selectedOption = answers[currentQuestion] !== undefined ? answers[currentQuestion] : null;
+                    renderQuestion();
+                    updateProgress();
+                } else {
+                    if (timerInterval) clearInterval(timerInterval);
+                    if (autoSaveInterval) clearInterval(autoSaveInterval);
+                    localStorage.removeItem('quickSave');
+                    saveTestResult();
+                    showResult();
+                }
+            }
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const texts = translations[currentLang];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = texts.progressText
+                .replace('{current}', currentQuestion + 1)
+                .replace('{total}', questions.length);
+            document.getElementById('progressPercent').textContent = texts.progressPercent
+                .replace('{percent}', Math.round(progress));
+        }
+
+        // 计算结果
+        function calculateResults() {
+            let depressionScore = 0;
+            let anxietyScore = 0;
+
+            // 抑郁症相关问题（1-10题）
+            for (let i = 0; i < 10; i++) {
+                if (answers[i] !== undefined) {
+                    depressionScore += questions[i].scores[answers[i]];
+                }
+            }
+
+            // 焦虑症相关问题（11-25题）
+            for (let i = 10; i < questions.length; i++) {
+                if (answers[i] !== undefined) {
+                    anxietyScore += questions[i].scores[answers[i]];
+                }
+            }
+
+            const maxDepressionScore = 30;
+            const maxAnxietyScore = 45;
+
+            const depressionPercentage = Math.min(100, (depressionScore / maxDepressionScore) * 100);
+            const anxietyPercentage = Math.min(100, (anxietyScore / maxAnxietyScore) * 100);
+
+            return {
+                depression: {
+                    score: depressionScore,
+                    percentage: Math.round(depressionPercentage)
+                },
+                anxiety: {
+                    score: anxietyScore,
+                    percentage: Math.round(anxietyPercentage)
+                }
+            };
+        }
+
+        // 保存测试结果
+        function saveTestResult() {
+            const results = calculateResults();
+            const timestamp = new Date().toLocaleString(currentLang);
+            const duration = testStartTime ? Math.floor((Date.now() - testStartTime - pausedTime) / 1000) : 0;
+
+            const result = {
+                timestamp: timestamp,
+                depression: results.depression.percentage,
+                anxiety: results.anxiety.percentage,
+                answers: [...answers],
+                duration: duration
+            };
+
+            testHistory.unshift(result);
+            if (testHistory.length > 50) {
+                testHistory = testHistory.slice(0, 50);
+            }
+
+            saveSettings();
+        }
+
+        // 显示结果
+        function showResult() {
+            const results = calculateResults();
+            const resultContainer = document.getElementById('result');
+            const quizContainer = document.getElementById('quiz-container');
+            const progressContainer = document.getElementById('progress-container');
+            const texts = translations[currentLang].results;
+            const commonTexts = translations[currentLang];
+
+            quizContainer.style.display = 'none';
+            progressContainer.style.display = 'none';
+            resultContainer.classList.add('active');
+
+            // 检查是否心理健康
+            const isHealthy = results.depression.percentage < 20 && results.anxiety.percentage < 20;
+
+            // 显示紧急求助提示
+            const emergencyBanner = document.getElementById('emergencyBanner');
+            if (results.depression.percentage >= 70 || results.anxiety.percentage >= 70) {
+                emergencyBanner.style.display = 'block';
+                emergencyBanner.querySelector('h3').textContent = commonTexts.emergency;
+                emergencyBanner.querySelector('p').textContent = commonTexts.emergencyDesc;
+                emergencyBanner.querySelector('.emergency-note').textContent = commonTexts.emergencyNote;
+            } else {
+                emergencyBanner.style.display = 'none';
+            }
+
+            if (isHealthy) {
+                // 显示心理健康结果
+                document.getElementById('score').innerHTML = `
+                    <div class="healthy-score">
+                        <h3>${commonTexts.healthyTitle}</h3>
+                        <p>📊 抑郁: ${results.depression.percentage}% | 焦虑: ${results.anxiety.percentage}%</p>
+                    </div>
+                `;
+                document.getElementById('description').innerHTML = `<p>${commonTexts.healthyDescription}</p>`;
+
+                const suggestionsHtml = commonTexts.healthySuggestions.map(s => `<li>${s}</li>`).join('');
+                document.getElementById('suggestions').innerHTML = `
+                    <h3>${texts.title}：</h3>
+                    <ul>${suggestionsHtml}</ul>
+                `;
+
+                document.getElementById('resultChart').style.display = 'none';
+                document.getElementById('statsSection').style.display = 'none';
+            } else {
+                // 显示问题结果
+                let mainIssue = '';
+                let mainPercentage = 0;
+                let secondaryIssue = '';
+                let secondaryPercentage = 0;
+
+                if (results.depression.percentage > results.anxiety.percentage) {
+                    mainIssue = texts.depression;
+                    mainPercentage = results.depression.percentage;
+                    secondaryIssue = texts.anxiety;
+                    secondaryPercentage = results.anxiety.percentage;
+                } else {
+                    mainIssue = texts.anxiety;
+                    mainPercentage = results.anxiety.percentage;
+                    secondaryIssue = texts.depression;
+                    secondaryPercentage = results.depression.percentage;
+                }
+
+                document.getElementById('score').innerHTML = `
+                    <div style="font-size: 1.2rem; margin-bottom: 10px;">${commonTexts.scoreLabel || '您可能存在'}</div>
+                    <div style="color: #667eea;">${mainIssue}</div>
+                    <div style="font-size: 1.5rem; margin-top: 10px;">${mainPercentage}%</div>
+                    ${secondaryPercentage > 20 ? `<div style="font-size: 1rem; margin-top: 10px; color: #718096;">${texts.combined}${secondaryIssue}：${secondaryPercentage}%</div>` : ''}
+                `;
+
+                // 生成描述和建议
+                let description = '';
+                let suggestions = [];
+
+                if (mainPercentage < 50) {
+                    description = texts.mild.description;
+                    suggestions = texts.mild.suggestions;
+                } else if (mainPercentage < 70) {
+                    description = texts.moderate.description;
+                    suggestions = texts.moderate.suggestions;
+                } else {
+                    description = texts.severe.description;
+                    suggestions = texts.severe.suggestions;
+                }
+
+                document.getElementById('description').innerHTML = `<p>${description}</p>`;
+
+                const suggestionsHtml = suggestions.map(s => `<li>${s}</li>`).join('');
+                document.getElementById('suggestions').innerHTML = `
+                    <h3>${texts.title}：</h3>
+                    <ul>${suggestionsHtml}</ul>
+                `;
+
+                // 绘制当前结果图表
+                drawChart(results.depression.percentage, results.anxiety.percentage);
+
+                // 显示历史趋势（如果有）
+                if (testHistory.length >= 2) {
+                    drawTrendChart();
+                    document.getElementById('statsSection').style.display = 'block';
+                } else {
+                    document.getElementById('statsSection').style.display = 'none';
+                }
+            }
+        }
+
+        // 绘制结果图表
+        function drawChart(depression, anxiety) {
+            const canvas = document.getElementById('resultChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const barColor1 = isDark ? '#6366f1' : '#818cf8';
+            const barColor2 = isDark ? '#3b82f6' : '#60a5fa';
+            const textColor = isDark ? '#e2e8f0' : '#4a5568';
+            const bgColor = isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.5)';
+
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('结果分布', width / 2, 25);
+
+            const maxValue = 100;
+            const barWidth = 80;
+            const barMaxHeight = 120;
+            const spacing = 30;
+            const startY = 50;
+
+            const depressionHeight = (depression / maxValue) * barMaxHeight;
+            ctx.fillStyle = barColor1;
+            ctx.fillRect(width / 2 - barWidth - spacing, startY + barMaxHeight - depressionHeight, barWidth, depressionHeight);
+
+            const anxietyHeight = (anxiety / maxValue) * barMaxHeight;
+            ctx.fillStyle = barColor2;
+            ctx.fillRect(width / 2 + spacing, startY + barMaxHeight - anxietyHeight, barWidth, anxietyHeight);
+
+            ctx.fillStyle = textColor;
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('抑郁', width / 2 - barWidth / 2 - spacing, startY + barMaxHeight + 20);
+            ctx.fillText('焦虑', width / 2 + barWidth / 2 + spacing, startY + barMaxHeight + 20);
+
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(depression + '%', width / 2 - barWidth / 2 - spacing, startY + barMaxHeight - depressionHeight - 5);
+            ctx.fillText(anxiety + '%', width / 2 + barWidth / 2 + spacing, startY + barMaxHeight - anxietyHeight - 5);
+
+            canvas.style.display = 'block';
+        }
+
+        // 绘制趋势图表
+        function drawTrendChart() {
+            const canvas = document.getElementById('trendChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const depColor = isDark ? '#818cf8' : '#6366f1';
+            const anxColor = isDark ? '#60a5fa' : '#3b82f6';
+            const textColor = isDark ? '#e2e8f0' : '#4a5568';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const bgColor = isDark ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.3)';
+
+            // 背景
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, width, height);
+
+            // 标题
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(translations[currentLang].trendChartTitle || '历史趋势图', width / 2, 25);
+
+            // 数据准备（最多显示最近10次）
+            const data = testHistory.slice(0, 10).reverse();
+            const maxPoints = Math.min(data.length, 10);
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2 - 30;
+
+            // 绘制网格
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+
+                // Y轴标签
+                ctx.fillStyle = textColor;
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText((100 - i * 20) + '%', padding - 5, y + 4);
+            }
+
+            // 绘制折线
+            if (maxPoints > 1) {
+                const stepX = chartWidth / (maxPoints - 1);
+
+                // 抑郁线
+                ctx.strokeStyle = depColor;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                data.forEach((item, i) => {
+                    const x = padding + i * stepX;
+                    const y = padding + chartHeight - (item.depression / 100) * chartHeight;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // 焦虑线
+                ctx.strokeStyle = anxColor;
+                ctx.beginPath();
+                data.forEach((item, i) => {
+                    const x = padding + i * stepX;
+                    const y = padding + chartHeight - (item.anxiety / 100) * chartHeight;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // 数据点
+                data.forEach((item, i) => {
+                    const x = padding + i * stepX;
+                    const yDep = padding + chartHeight - (item.depression / 100) * chartHeight;
+                    const yAnx = padding + chartHeight - (item.anxiety / 100) * chartHeight;
+
+                    // 抑郁点
+                    ctx.fillStyle = depColor;
+                    ctx.beginPath();
+                    ctx.arc(x, yDep, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 焦虑点
+                    ctx.fillStyle = anxColor;
+                    ctx.beginPath();
+                    ctx.arc(x, yAnx, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // X轴标签（序号）
+                ctx.fillStyle = textColor;
+                ctx.font = '11px Arial';
+                ctx.textAlign = 'center';
+                data.forEach((item, i) => {
+                    const x = padding + i * stepX;
+                    ctx.fillText(`#${data.length - i}`, x, height - 10);
+                });
+
+                // 图例
+                ctx.font = '12px Arial';
+                ctx.fillStyle = depColor;
+                ctx.fillText('● 抑郁', width - 120, 35);
+                ctx.fillStyle = anxColor;
+                ctx.fillText('● 焦虑', width - 60, 35);
+            } else {
+                // 数据不足提示
+                ctx.fillStyle = textColor;
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('需要至少2次测试数据', width / 2, height / 2);
+            }
+        }
+
+        // 分享结果
+        function shareResult() {
+            const results = calculateResults();
+            const texts = translations[currentLang];
+            const timestamp = new Date().toLocaleString(currentLang);
+
+            let shareText = `【${texts.resultTitle}】${timestamp}\n`;
+            shareText += `📊 抑郁倾向: ${results.depression.percentage}%\n`;
+            shareText += `📊 焦虑倾向: ${results.anxiety.percentage}%\n\n`;
+
+            if (results.depression.percentage < 20 && results.anxiety.percentage < 20) {
+                shareText += `✅ ${texts.healthyTitle}`;
+            } else {
+                const mainIssue = results.depression.percentage > results.anxiety.percentage ?
+                    texts.depression : texts.anxiety;
+                const mainPercentage = Math.max(results.depression.percentage, results.anxiety.percentage);
+                shareText += `⚠️ 主要问题: ${mainIssue} (${mainPercentage}%)`;
+            }
+
+            shareText += `\n\n#心理健康自测`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast(texts.shareSuccess);
+                }).catch(() => {
+                    fallbackCopy(shareText, texts.shareFailed);
+                });
+            } else {
+                fallbackCopy(shareText, texts.shareFailed);
+            }
+        }
+
+        // 降级复制
+        function fallbackCopy(text, failMessage) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(translations[currentLang].shareSuccess);
+            } catch (err) {
+                showToast(failMessage, 'error');
+                alert(text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 打印结果
+        function printResults() {
+            const texts = translations[currentLang];
+            try {
+                window.print();
+                showToast(texts.printSuccess, 'info');
+            } catch (err) {
+                showToast(texts.printFailed, 'error');
+            }
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            const modal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            const texts = translations[currentLang];
+
+            modal.style.display = 'block';
+
+            if (testHistory.length === 0) {
+                historyList.innerHTML = `<div class="empty-history">${texts.noHistory}</div>`;
+                return;
+            }
+
+            const historyHtml = testHistory.map((item, index) => {
+                let status = '';
+                let badgeClass = '';
+
+                if (item.depression < 20 && item.anxiety < 20) {
+                    status = texts.healthyTitle;
+                    badgeClass = 'badge-healthy';
+                } else if (Math.max(item.depression, item.anxiety) < 50) {
+                    status = texts.mild.description.substring(0, 12) + '...';
+                    badgeClass = 'badge-mild';
+                } else if (Math.max(item.depression, item.anxiety) < 70) {
+                    status = texts.moderate.description.substring(0, 12) + '...';
+                    badgeClass = 'badge-moderate';
+                } else {
+                    status = texts.severe.description.substring(0, 12) + '...';
+                    badgeClass = 'badge-severe';
+                }
+
+                const duration = item.duration ? ` | ⏱️ ${Math.floor(item.duration / 60)}:${(item.duration % 60).toString().padStart(2, '0')}` : '';
+
+                return `
+                    <div class="history-item">
+                        <h4>${texts.historyTitle} #${testHistory.length - index}</h4>
+                        <div class="date">${item.timestamp}${duration}</div>
+                        <div class="scores">
+                            <span>📊 抑郁: ${item.depression}%</span>
+                            <span>📊 焦虑: ${item.anxiety}%</span>
+                            <span class="badge ${badgeClass}">${status}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            historyList.innerHTML = historyHtml;
+        }
+
+        // 关闭历史记录
+        function closeHistory() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // 清除历史记录
+        function clearHistory() {
+            const texts = translations[currentLang];
+            if (confirm(texts.clearHistoryConfirm)) {
+                testHistory = [];
+                feedbackHistory = [];
+                saveSettings();
+                showToast(texts.clearHistorySuccess);
+                updateQuickStats();
+                closeHistory();
+
+                document.getElementById('exportButton').style.display = 'none';
+                document.getElementById('importButton').style.display = 'none';
+            }
+        }
+
+        // 导出数据
+        function exportData() {
+            const texts = translations[currentLang];
+            if (testHistory.length === 0) {
+                showToast(texts.emptyExport, 'info');
+                return;
+            }
+
+            try {
+                const exportData = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    language: currentLang,
+                    history: testHistory,
+                    feedback: feedbackHistory,
+                    stats: {
+                        totalTests: testHistory.length,
+                        avgDepression: Math.round(testHistory.reduce((s, i) => s + i.depression, 0) / testHistory.length),
+                        avgAnxiety: Math.round(testHistory.reduce((s, i) => s + i.anxiety, 0) / testHistory.length)
+                    }
+                };
+
+                const json = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mental_health_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+
+                showToast(texts.exportSuccess);
+            } catch (err) {
+                showToast(texts.exportFailed, 'error');
+            }
+        }
+
+        // 显示导入对话框
+        function showImportDialog() {
+            document.getElementById('importModal').style.display = 'block';
+        }
+
+        // 关闭导入对话框
+        function closeImportDialog() {
+            document.getElementById('importModal').style.display = 'none';
+            const fileInput = document.getElementById('importFile');
+            if (fileInput) fileInput.value = '';
+        }
+
+        // 导入数据
+        function importData() {
+            const texts = translations[currentLang];
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showToast('请选择文件', 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // 验证数据格式
+                    if (!data.history || !Array.isArray(data.history)) {
+                        throw new Error('Invalid format');
+                    }
+
+                    // 合并数据
+                    const existingIds = new Set(testHistory.map(item => item.timestamp));
+                    let importedCount = 0;
+
+                    data.history.forEach(item => {
+                        if (!existingIds.has(item.timestamp)) {
+                            testHistory.unshift(item);
+                            importedCount++;
+                        }
+                    });
+
+                    if (data.feedback && Array.isArray(data.feedback)) {
+                        feedbackHistory = [...data.feedback, ...feedbackHistory].slice(0, 100);
+                    }
+
+                    // 保持50条限制
+                    if (testHistory.length > 50) {
+                        testHistory = testHistory.slice(0, 50);
+                    }
+
+                    saveSettings();
+                    updateQuickStats();
+                    closeImportDialog();
+
+                    showToast(`${texts.importSuccess} (${importedCount} 条)`);
+
+                    // 更新界面
+                    if (document.getElementById('result').classList.contains('active')) {
+                        showResult();
+                    }
+
+                } catch (err) {
+                    showToast(texts.importFailed, 'error');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        // 显示趋势图表
+        function showTrendChart() {
+            const texts = translations[currentLang];
+            if (testHistory.length < 2) {
+                showToast('需要至少2次测试数据', 'info');
+                return;
+            }
+
+            // 滚动到结果区域
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+
+            // 确保图表显示
+            document.getElementById('statsSection').style.display = 'block';
+            drawTrendChart();
+
+            showToast(texts.statsTitle, 'info');
+        }
+
+        // 提交反馈
+        function submitFeedback(rating) {
+            const texts = translations[currentLang];
+            const feedback = {
+                timestamp: new Date().toLocaleString(currentLang),
+                rating: rating,
+                language: currentLang
+            };
+
+            feedbackHistory.unshift(feedback);
+            if (feedbackHistory.length > 100) {
+                feedbackHistory = feedbackHistory.slice(0, 100);
+            }
+
+            saveSettings();
+            showToast(texts.feedbackThanks);
+
+            // 视觉反馈
+            const buttons = document.querySelectorAll('.feedback-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+                btn.style.transform = 'scale(0.95)';
+            });
+        }
+
+        // 显示帮助
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        // 关闭帮助
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // 返回主页
+        function backToIntro() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+            renderIntro();
+        }
+
+        // 重置测试
+        function resetQuiz() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+            currentQuestion = 0;
+            answers = [];
+            selectedOption = null;
+            isPaused = false;
+            testStartTime = null;
+            pausedTime = 0;
+
+            localStorage.removeItem('pausedTest');
+            localStorage.removeItem('quickSave');
+
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('pause-container').style.display = 'none';
+            renderIntro();
+        }
+
+        // 键盘快捷键
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // 忽略输入框中的按键
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+                const key = e.key.toLowerCase();
+
+                // 全局快捷键
+                if (key === 't') {
+                    e.preventDefault();
+                    toggleTheme();
+                } else if (key === 'h') {
+                    e.preventDefault();
+                    showHistory();
+                } else if (key === 's' && document.getElementById('intro-container').style.display !== 'none') {
+                    e.preventDefault();
+                    startTest();
+                } else if (key === 'r' && document.getElementById('result').classList.contains('active')) {
+                    e.preventDefault();
+                    resetQuiz();
+                } else if (key === 'escape') {
+                    e.preventDefault();
+                    if (document.getElementById('helpModal').style.display === 'block') {
+                        closeHelp();
+                    } else if (document.getElementById('historyModal').style.display === 'block') {
+                        closeHistory();
+                    } else if (document.getElementById('importModal').style.display === 'block') {
+                        closeImportDialog();
+                    } else if (document.getElementById('result').classList.contains('active')) {
+                        backToIntro();
+                    }
+                } else if (key === ' ' && document.getElementById('quiz-container').style.display !== 'none') {
+                    e.preventDefault();
+                    if (isPaused) {
+                        resumeTest();
+                    } else {
+                        pauseTest();
+                    }
+                } else if (key === 'e' && document.getElementById('intro-container').style.display !== 'none') {
+                    e.preventDefault();
+                    if (testHistory.length > 0) exportData();
+                } else if (key === 'i' && document.getElementById('intro-container').style.display !== 'none') {
+                    e.preventDefault();
+                    showImportDialog();
+                }
+
+                // Ctrl组合键
+                if (e.ctrlKey || e.metaKey) {
+                    if (key === 's') {
+                        e.preventDefault();
+                        if (document.getElementById('quiz-container').style.display !== 'none') {
+                            quickSave();
+                        }
+                    } else if (key === 'p') {
+                        e.preventDefault();
+                        if (document.getElementById('result').classList.contains('active')) {
+                            printResults();
+                        }
+                    } else if (key === 'c') {
+                        e.preventDefault();
+                        if (document.getElementById('result').classList.contains('active')) {
+                            shareResult();
+                        }
+                    }
+                }
+
+                // 测试中导航
+                if (document.getElementById('quiz-container').style.display !== 'none') {
+                    if (key === 'arrowleft') {
+                        e.preventDefault();
+                        previousQuestion();
+                    } else if (key === 'arrowright') {
+                        e.preventDefault();
+                        if (selectedOption !== null) {
+                            nextQuestion();
+                        }
+                    }
+                }
+            });
+        }
+
+        // 右键菜单
+        function setupContextMenu() {
+            const container = document.getElementById('mainContainer');
+            const contextMenu = document.getElementById('contextMenu');
+
+            container.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+
+            document.addEventListener('click', () => {
+                contextMenu.style.display = 'none';
+            });
+
+            // 移动端长按支持
+            let touchTimer;
+            container.addEventListener('touchstart', (e) => {
+                touchTimer = setTimeout(() => {
+                    const touch = e.touches[0];
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = touch.pageX + 'px';
+                    contextMenu.style.top = touch.pageY + 'px';
+                }, 500);
+            });
+
+            container.addEventListener('touchend', () => {
+                clearTimeout(touchTimer);
+            });
+        }
+
+        // 自动保存设置
+        function setupAutoSave() {
+            // 页面卸载前保存
+            window.addEventListener('beforeunload', (e) => {
+                if (answers.length > 0 && !isPaused) {
+                    quickSave(true);
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        }
+
+        // PWA支持
+        function setupPWA() {
+            // 检查是否支持PWA
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => {
+                        e.waitUntil(
+                            caches.open('mental-health-v1').then((cache) => {
+                                return cache.addAll(['/']);
+                            })
+                        );
+                    });
+
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            caches.match(e.request).then((response) => {
+                                return response || fetch(e.request);
+                            })
+                        );
+                    });
+                `;
+
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+
+                navigator.serviceWorker.register(swUrl).then(() => {
+                    console.log('Service Worker registered');
+                }).catch(() => {
+                    // 静默失败
+                });
+            }
+
+            // 检查是否可以安装
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                console.log('PWA can be installed');
+            });
+        }
+
+        // 全屏模式
+        function toggleFullscreen() {
+            const texts = translations[currentLang];
+            const container = document.getElementById('mainContainer');
+
+            if (!isFullscreen) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+                container.classList.add('fullscreen');
+                isFullscreen = true;
+                showToast(texts.fullscreenEnter || '进入全屏模式', 'info');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                container.classList.remove('fullscreen');
+                isFullscreen = false;
+                showToast(texts.fullscreenExit || '退出全屏模式', 'info');
+            }
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const historyModal = document.getElementById('historyModal');
+            const helpModal = document.getElementById('helpModal');
+            const importModal = document.getElementById('importModal');
+
+            if (event.target === historyModal) {
+                closeHistory();
+            }
+            if (event.target === helpModal) {
+                closeHelp();
+            }
+            if (event.target === importModal) {
+                closeImportDialog();
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
